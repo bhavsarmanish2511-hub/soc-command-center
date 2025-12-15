@@ -13,10 +13,6 @@ export default {
       },
     },
     extend: {
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -51,22 +47,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        critical: {
-          DEFAULT: "hsl(var(--critical))",
-          glow: "hsl(var(--critical-glow))",
-        },
-        warning: {
-          DEFAULT: "hsl(var(--warning))",
-          glow: "hsl(var(--warning-glow))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          glow: "hsl(var(--success-glow))",
-        },
-        info: {
-          DEFAULT: "hsl(var(--info))",
-          glow: "hsl(var(--info-glow))",
-        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -77,6 +57,33 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        soc: {
+          DEFAULT: "hsl(var(--soc))",
+          foreground: "hsl(var(--soc-foreground))",
+          muted: "hsl(var(--soc-muted))",
+        },
+        noc: {
+          DEFAULT: "hsl(var(--noc))",
+          foreground: "hsl(var(--noc-foreground))",
+          muted: "hsl(var(--noc-muted))",
+        },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        error: "hsl(var(--error))",
+        info: "hsl(var(--info))",
+        quantum: {
+          primary: "hsl(var(--quantum-primary))",
+          secondary: "hsl(var(--quantum-secondary))",
+          accent: "hsl(var(--quantum-accent))",
+          glow: "hsl(var(--quantum-glow))",
+        },
+        login: {
+          bg: "hsl(var(--login-bg))",
+          panel: "hsl(var(--login-panel))",
+          glow: "hsl(var(--login-glow))",
+          highlight: "hsl(var(--login-highlight))",
+          text: "hsl(var(--login-text))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -85,12 +92,20 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
         },
       },
       animation: {
