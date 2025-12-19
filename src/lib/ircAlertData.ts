@@ -135,7 +135,6 @@ export const ircAlerts: IRCAlert[] = [
         'Prioritize EU-West-1 traffic routing first (currently €1.2M/hour peak) before AP-Southeast-1 (¥890K/hour)',
         'Pre-scale US-West-2 ECS services by 340% based on incoming traffic redistribution',
         'Enable Route 53 Application Recovery Controller for coordinated multi-service failover',
-        'Extend Aurora connection timeout from 30s to 120s during Global Database promotion',
       ],
       workflowImpact: [
         { id: 'WF-001', name: 'Route 53 DNS Failover', status: 'completed', duration: '2m 34s', dependencies: [] },
