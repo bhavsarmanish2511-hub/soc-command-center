@@ -163,21 +163,6 @@ const aiStrategyDetails: Record<string, {
     estimatedImpact: 'Single-action failover reduces coordination time by 67%. RTO under 2 minutes.',
     riskMitigation: 'Readiness checks prevent failover to unhealthy regions. Rollback available within 60s.'
   },
-  'Extend Aurora connection timeout from 30s to 120s during Global Database promotion': {
-    title: 'Aurora Connection Pool Optimization',
-    confidence: 83.7,
-    howItWorks: 'During Aurora Global Database promotion, connections experience 45-90 second latency spikes. Extending pool timeout prevents connection drops and retry storms that can overwhelm newly promoted primary.',
-    resolutionPath: [
-      'Update RDS proxy connection timeout to 120s',
-      'Modify application connection pool settings',
-      'Enable connection keep-alive optimization',
-      'Activate query queuing for overflow',
-      'Monitor connection pool utilization',
-      'Restore normal timeouts after stabilization'
-    ],
-    estimatedImpact: 'Prevents 23% of transaction failures during Global DB promotion window.',
-    riskMitigation: 'Automatic timeout restoration after stability confirmed. Pool exhaustion alerts active.'
-  },
   'Implement adaptive rate limiting based on user behavior patterns': {
     title: 'Adaptive Rate Limiting',
     confidence: 87.4,
@@ -904,6 +889,15 @@ export function IRCAlertDetail({ alert, onBack, onStatusUpdate }: IRCAlertDetail
     };
   };
 
+  // Sort recommendations by confidence percentage (descending)
+  const getSortedRecommendations = useCallback(() => {
+    return [...alert.details.aiRecommendations].sort((a, b) => {
+      const confA = getStrategyDetails(a).confidence;
+      const confB = getStrategyDetails(b).confidence;
+      return confB - confA;
+    });
+  }, [alert.details.aiRecommendations]);
+
   // Override handler with realistic data updates
   const handleOverride = () => {
     if (!overrideJustification.trim()) {
@@ -1242,7 +1236,7 @@ ${activityLog.map(log => `[${log.timestamp.toLocaleTimeString()}] [${log.categor
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 pt-0">
-              {alert.details.aiRecommendations.map((rec, i) => {
+              {getSortedRecommendations().map((rec, i) => {
                 const details = getStrategyDetails(rec);
                 return (
                   <div key={i} className="flex items-center gap-3 p-3 rounded bg-muted/10 border border-border/20">
@@ -2235,7 +2229,7 @@ ${activityLog.map(log => `[${log.timestamp.toLocaleTimeString()}] [${log.categor
 
                     {/* All Strategy Cards - Show ALL recommendations */}
                     <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-1">
-                      {alert.details.aiRecommendations.map((rec, i) => {
+                      {getSortedRecommendations().map((rec, i) => {
                         const details = getStrategyDetails(rec);
                         const strategyResult = perStrategyResults[rec];
                         const isSimulated = strategyResult?.simulated;

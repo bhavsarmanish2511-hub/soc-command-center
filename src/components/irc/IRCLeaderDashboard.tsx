@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ircAlerts as initialAlerts, IRCAlert } from '@/lib/ircAlertData';
-import { AlertTriangle, Clock, MapPin, Server, DollarSign, Shield, Activity, Zap, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Clock, MapPin, Server, DollarSign, Shield, Activity, Zap, CheckCircle, ArrowUp, ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { IRCAlertDetail } from './IRCAlertDetail';
 
@@ -35,6 +36,23 @@ export function IRCLeaderDashboard() {
   const [selectedAlert, setSelectedAlert] = useState<IRCAlert | null>(null);
   const [alerts, setAlerts] = useState<IRCAlert[]>(initialAlerts);
   const [resolvedMetrics, setResolvedMetrics] = useState<Record<string, ResolvedMetrics>>({});
+  
+  // Escalation state - critical alerts are escalated by default
+  const [escalationStatus, setEscalationStatus] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    initialAlerts.forEach(alert => {
+      initial[alert.id] = alert.severity === 'critical';
+    });
+    return initial;
+  });
+
+  const handleEscalationToggle = (alertId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    setEscalationStatus(prev => ({
+      ...prev,
+      [alertId]: !prev[alertId]
+    }));
+  };
 
   const handleStatusUpdate = (alertId: string, newStatus: string, metrics?: ResolvedMetrics) => {
     setAlerts(prev => prev.map(alert => 
@@ -208,7 +226,7 @@ export function IRCLeaderDashboard() {
                   isResolved ? severityStyles.resolved : severityStyles[alert.severity]
                 )}
               >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge className={cn(statusStyles[alert.status], "text-xs px-2.5 py-0.5 uppercase tracking-wide")}>
@@ -251,18 +269,57 @@ export function IRCLeaderDashboard() {
                       </span>
                     </div>
                   </div>
-                  <div className="text-right space-y-1">
-                    {isResolved && metrics ? (
-                      <>
-                        <p className="text-sm font-medium text-emerald-400">MTTR: {metrics.mttr}</p>
-                        <p className="text-sm text-emerald-400/80">Protected: {metrics.revenueProtected}</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium text-foreground/70">{alert.businessImpact}</p>
-                        <p className="text-sm text-error">{alert.slaRisk}</p>
-                      </>
+                  <div className="flex flex-col items-end gap-3">
+                    {/* Escalation Toggle */}
+                    {!isResolved && (
+                      <div 
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-lg border transition-all",
+                          escalationStatus[alert.id] 
+                            ? "bg-red-950/50 border-red-500/40" 
+                            : "bg-muted/20 border-border/30"
+                        )}
+                        onClick={(e) => handleEscalationToggle(alert.id, e)}
+                      >
+                        <span className={cn(
+                          "text-xs font-medium uppercase tracking-wide flex items-center gap-1.5",
+                          escalationStatus[alert.id] ? "text-red-400" : "text-muted-foreground"
+                        )}>
+                          {escalationStatus[alert.id] ? (
+                            <>
+                              <ArrowUp className="h-3.5 w-3.5" />
+                              Escalated
+                            </>
+                          ) : (
+                            <>
+                              <ArrowDown className="h-3.5 w-3.5" />
+                              Not Escalated
+                            </>
+                          )}
+                        </span>
+                        <Switch
+                          checked={escalationStatus[alert.id]}
+                          onCheckedChange={() => {}}
+                          className={cn(
+                            "data-[state=checked]:bg-red-500",
+                            "h-5 w-9"
+                          )}
+                        />
+                      </div>
                     )}
+                    <div className="text-right space-y-1">
+                      {isResolved && metrics ? (
+                        <>
+                          <p className="text-sm font-medium text-emerald-400">MTTR: {metrics.mttr}</p>
+                          <p className="text-sm text-emerald-400/80">Protected: {metrics.revenueProtected}</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium text-foreground/70">{alert.businessImpact}</p>
+                          <p className="text-sm text-error">{alert.slaRisk}</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
