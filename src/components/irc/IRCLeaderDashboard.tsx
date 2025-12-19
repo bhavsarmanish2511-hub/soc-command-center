@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ircAlerts as initialAlerts, IRCAlert } from '@/lib/ircAlertData';
-import { AlertTriangle, Clock, MapPin, Server, DollarSign, Shield, Activity, Zap, CheckCircle, ArrowUp, ArrowDown } from 'lucide-react';
+import { AlertTriangle, Clock, MapPin, Server, DollarSign, Shield, Activity, Zap, CheckCircle, TrendingUp, Bell, BellOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { IRCAlertDetail } from './IRCAlertDetail';
+import { toast } from 'sonner';
 
 const severityStyles = {
   critical: 'bg-red-950/40 border-red-500/40 hover:border-red-500/60',
@@ -46,12 +47,23 @@ export function IRCLeaderDashboard() {
     return initial;
   });
 
-  const handleEscalationToggle = (alertId: string, e: React.MouseEvent) => {
+  const handleEscalationToggle = (alertId: string, alertTitle: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
+    const newStatus = !escalationStatus[alertId];
     setEscalationStatus(prev => ({
       ...prev,
-      [alertId]: !prev[alertId]
+      [alertId]: newStatus
     }));
+    
+    if (newStatus) {
+      toast.success(`Incident ${alertId} escalated to leadership`, {
+        description: 'Notifications sent to incident commanders'
+      });
+    } else {
+      toast.info(`Incident ${alertId} de-escalated`, {
+        description: 'Standard response protocols restored'
+      });
+    }
   };
 
   const handleStatusUpdate = (alertId: string, newStatus: string, metrics?: ResolvedMetrics) => {
@@ -270,42 +282,32 @@ export function IRCLeaderDashboard() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-3">
-                    {/* Escalation Toggle */}
+                    {/* Escalation Control */}
                     {!isResolved && (
-                      <div 
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleEscalationToggle(alert.id, alert.title, e)}
                         className={cn(
-                          "flex items-center gap-2 px-3 py-2 rounded-lg border transition-all",
+                          "h-9 px-4 gap-2 font-medium transition-all duration-200",
                           escalationStatus[alert.id] 
-                            ? "bg-red-950/50 border-red-500/40" 
-                            : "bg-muted/20 border-border/30"
+                            ? "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-red-500/50 shadow-lg shadow-red-500/20" 
+                            : "bg-muted/30 hover:bg-muted/50 text-muted-foreground border-border/50 hover:border-border"
                         )}
-                        onClick={(e) => handleEscalationToggle(alert.id, e)}
                       >
-                        <span className={cn(
-                          "text-xs font-medium uppercase tracking-wide flex items-center gap-1.5",
-                          escalationStatus[alert.id] ? "text-red-400" : "text-muted-foreground"
-                        )}>
-                          {escalationStatus[alert.id] ? (
-                            <>
-                              <ArrowUp className="h-3.5 w-3.5" />
-                              Escalated
-                            </>
-                          ) : (
-                            <>
-                              <ArrowDown className="h-3.5 w-3.5" />
-                              Not Escalated
-                            </>
-                          )}
-                        </span>
-                        <Switch
-                          checked={escalationStatus[alert.id]}
-                          onCheckedChange={() => {}}
-                          className={cn(
-                            "data-[state=checked]:bg-red-500",
-                            "h-5 w-9"
-                          )}
-                        />
-                      </div>
+                        {escalationStatus[alert.id] ? (
+                          <>
+                            <Bell className="h-4 w-4 animate-pulse" />
+                            <span>Escalated</span>
+                            <TrendingUp className="h-3.5 w-3.5" />
+                          </>
+                        ) : (
+                          <>
+                            <BellOff className="h-4 w-4" />
+                            <span>Escalate</span>
+                          </>
+                        )}
+                      </Button>
                     )}
                     <div className="text-right space-y-1">
                       {isResolved && metrics ? (
